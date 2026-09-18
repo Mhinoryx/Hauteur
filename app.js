@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let roomCode = '';
   let role = ''; // 'mj' ou 'joueur'
   let socket = null;
+  let createRoomTimeout = null;
   
   // Données de jeu
   let players = []; // Liste des joueurs connectés [{ pseudo, score, answered, correct, lastPoints, ready, is_fastest }]
@@ -141,12 +142,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Connecter la socket au serveur Flask
-    setupSocket();
+    if (!setupSocket()) {
+      alert("Impossible de contacter le serveur de jeu. Recharge la page puis réessaie.");
+      return;
+    }
 
     if (isGM) {
       role = 'mj';
+      setCreateButtonBusy(true);
       btnStartGame.disabled = true; // Désactivé jusqu'à ce que tous les joueurs soient prêts
       socket.emit('create_room', { pseudo: pseudo });
+      clearTimeout(createRoomTimeout);
+      createRoomTimeout = setTimeout(() => {
+        setCreateButtonBusy(false);
+        alert("Le serveur n'a pas répondu. Vérifie qu'il est bien lancé, puis réessaie.");
+      }, 10000);
     } else {
       role = 'joueur';
       roomCode = inputRoom.value.trim().toUpperCase();
@@ -163,10 +173,21 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function setupSocket() {
+    if (typeof window.io !== 'function') {
+      return false;
+    }
+
+    if (socket) {
+      socket.disconnect();
+    }
+
     socket = io();
 
     // Le serveur renvoie le code du salon créé
     socket.on('room_created', (data) => {
+      clearTimeout(createRoomTimeout);
+      createRoomTimeout = null;
+      setCreateButtonBusy(false);
       roomCode = data.room;
       lobbyGmControls.classList.remove('hidden');
       setupLobbyUI();
@@ -256,13 +277,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Erreur réseau / Room inexistante
     socket.on('error_message', (data) => {
+      clearTimeout(createRoomTimeout);
+      createRoomTimeout = null;
+      setCreateButtonBusy(false);
       alert(data.message);
       resetApp();
+    });
+
+    socket.on('connect_error', () => {
+      clearTimeout(createRoomTimeout);
+      createRoomTimeout = null;
+      setCreateButtonBusy(false);
+      alert("Connexion au serveur impossible. Vérifie qu'il est bien lancé, puis réessaie.");
     });
 
     socket.on('disconnect', () => {
       console.warn("Déconnecté du serveur... ⚠️");
     });
+
+    return true;
   }
 
   function setupLobbyUI() {
@@ -623,8 +656,23 @@ document.addEventListener('DOMContentLoaded', () => {
     inputEl.focus();
   }
 
+  function setCreateButtonBusy(isBusy) {
+    if (!btnCreateGame.dataset.defaultLabel) {
+      btnCreateGame.dataset.defaultLabel = btnCreateGame.innerHTML;
+    }
+    btnCreateGame.disabled = isBusy;
+    if (isBusy) {
+      btnCreateGame.textContent = 'Création du salon…';
+    } else {
+      btnCreateGame.innerHTML = btnCreateGame.dataset.defaultLabel;
+    }
+  }
+
   function resetApp() {
     clearInterval(timerInterval);
+    clearTimeout(createRoomTimeout);
+    createRoomTimeout = null;
+    setCreateButtonBusy(false);
     if (socket) {
       socket.disconnect();
     }
