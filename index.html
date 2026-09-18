@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz F400 - Jeu de Quiz pour Quentin</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+</head>
+
+<body>
+  <div id="app-layout">
+
+
+
+    <!-- Zone principale -->
+    <main id="main-content">
+
+      <!-- ÉCRAN 1 : ACCUEIL -->
+      <section id="screen-welcome" class="glass-panel fade-in">
+        <h1 class="game-title">Quiz F400</h1>
+        <p>Rejoignez ou créez une session de quiz multijoueur en temps réel avec vos amis !</p>
+
+        <div class="input-group">
+          <label for="input-pseudo" class="input-label">Ton Pseudo</label>
+          <input type="text" id="input-pseudo" class="input-field" placeholder="The Bee Keeper par exemple.. #API"
+            maxlength="15" required autocomplete="off">
+        </div>
+
+        <div class="input-group" id="group-room-code">
+          <label for="input-room" class="input-label">Code de la Partie</label>
+          <input type="text" id="input-room" class="input-field" placeholder="Ex: 87A2" maxlength="6"
+            autocomplete="off">
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 2rem;">
+          <button id="btn-create-game" class="btn btn-primary">
+            <span></span> Créer une partie (Maître du Jeu)
+          </button>
+          <button id="btn-join-game" class="btn btn-accent">
+            <span></span> Rejoindre la partie
+          </button>
+        </div>
+      </section>
+
+      <!-- ÉCRAN 2 : LOBBY -->
+      <section id="screen-lobby" class="glass-panel fade-in hidden">
+        <h1 class="game-title">Salon d'attente</h1>
+
+        <div class="lobby-info">
+          <div class="share-card">
+            <div style="text-align: left; max-width: calc(100% - 130px);">
+              <span class="input-label" style="margin-bottom: 0.2rem;">Lien de partage</span>
+              <a id="share-link" class="share-link-text" href="#" target="_blank">Lien de partage de la partie</a>
+            </div>
+            <button id="btn-copy-link" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+              📋 Copier
+            </button>
+          </div>
+
+          <div>
+            <h3 class="input-label" style="text-align: left;">Joueurs connectés</h3>
+            <div class="players-list" id="lobby-players">
+              <!-- Rempli en JS -->
+            </div>
+          </div>
+
+          <!-- Options réservées au Maître du Jeu -->
+          <div id="lobby-gm-controls" class="hidden">
+            <div class="input-group" style="margin-bottom: 0;">
+              <label for="input-timer" class="input-label">Temps par question (secondes)</label>
+              <input type="number" id="input-timer" class="input-field" value="15" min="5" max="60"
+                style="text-align: center;">
+            </div>
+            <button id="btn-start-game" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;">
+              🏁 Lancer la partie
+            </button>
+          </div>
+
+          <!-- Message d'attente pour les joueurs -->
+          <div id="lobby-player-message" class="hidden">
+            <button id="btn-toggle-ready" class="btn btn-accent" style="width: 100%; margin-bottom: 1.2rem;">
+              Je suis prêt !
+            </button>
+            <p
+              style="margin-bottom: 0; padding: 1rem; background: #eee4d5; border-radius: 12px; border: 1px dashed var(--border-glass-active);">
+              En attente que le Maître du Jeu lance la partie...
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ÉCRAN 3 : DASHBOARD MAÎTRE DU JEU -->
+      <section id="screen-gm-dashboard" class="glass-panel fade-in hidden">
+        <h1 class="game-title">Maître du Jeu</h1>
+
+        <div class="gm-dashboard">
+          <div class="dashboard-stat-grid">
+            <div class="stat-card">
+              <div class="stat-val" id="gm-stat-question">1 / 10</div>
+              <div class="stat-label">Question</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-val" id="gm-stat-players">0 / 0</div>
+              <div class="stat-label">Réponses</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-val" id="gm-stat-timer">-</div>
+              <div class="stat-label">Temps</div>
+            </div>
+          </div>
+
+          <div class="current-question-preview">
+            <div id="gm-question-diff" class="difficulty-badge diff-facile">Facile</div>
+            <h3 id="gm-question-text" style="margin-bottom: 0.8rem;">Texte de la question...</h3>
+            <ol id="gm-question-options"
+              style="margin-left: 1.2rem; color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">
+              <!-- Rempli en JS -->
+            </ol>
+          </div>
+
+          <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+            <button id="btn-gm-show-answers" class="btn btn-accent" style="flex: 1;" disabled>
+              Afficher la réponse
+            </button>
+            <button id="btn-gm-next-question" class="btn btn-primary" style="flex: 1;" disabled>
+              Question suivante
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ÉCRAN 4 : ÉCRAN DE JEU JOUEUR -->
+      <section id="screen-player" class="glass-panel fade-in hidden">
+        <div class="quiz-header">
+          <div>
+            <div id="player-question-counter" class="question-counter">Question 1 / 10</div>
+            <div id="player-difficulty" class="difficulty-badge diff-facile"
+              style="margin-top: 0.4rem; margin-bottom: 0;">Facile</div>
+          </div>
+
+          <!-- Compte à rebours circulaire -->
+          <div class="timer-container">
+            <svg class="timer-svg" viewBox="0 0 60 60">
+              <circle class="timer-bg-circle" cx="30" cy="30" r="28"></circle>
+              <circle class="timer-progress-circle" id="timer-progress" cx="30" cy="30" r="28"></circle>
+            </svg>
+            <div class="timer-text" id="player-timer-val">15</div>
+          </div>
+        </div>
+
+        <h2 id="player-question-text" class="question-text">Quelle est la capitale de l'Australie ?</h2>
+
+        <div class="options-grid" id="player-options-container">
+          <button class="option-btn" data-letter="A" data-index="0">Option 1</button>
+          <button class="option-btn" data-letter="B" data-index="1">Option 2</button>
+          <button class="option-btn" data-letter="C" data-index="2">Option 3</button>
+          <button class="option-btn" data-letter="D" data-index="3">Option 4</button>
+        </div>
+
+        <div id="player-feedback" class="feedback-box">
+          <!-- Rempli dynamiquement en JS (Correct, Faux, En attente...) -->
+        </div>
+      </section>
+
+      <!-- ÉCRAN 5 : CLASSEMENT FINAL -->
+      <section id="screen-leaderboard" class="glass-panel fade-in hidden">
+        <h1 class="game-title">Classement Final</h1>
+
+        <!-- Podium -->
+        <div class="podium-container" id="podium-view">
+          <div class="podium-step podium-1st" id="podium-place-1">
+            <div class="podium-avatar-wrap">
+              <div class="podium-rank-badge" aria-label="Première place">1</div>
+              <div class="podium-avatar" id="podium-avatar-1">?</div>
+            </div>
+            <div class="podium-name" id="podium-name-1">En attente</div>
+            <div class="podium-score" id="podium-score-1">—</div>
+          </div>
+
+          <div class="podium-step podium-2nd" id="podium-place-2">
+            <div class="podium-avatar-wrap">
+              <div class="podium-rank-badge" aria-label="Deuxième place">2</div>
+              <div class="podium-avatar" id="podium-avatar-2">?</div>
+            </div>
+            <div class="podium-name" id="podium-name-2">En attente</div>
+            <div class="podium-score" id="podium-score-2">—</div>
+          </div>
+
+          <div class="podium-step podium-3rd" id="podium-place-3">
+            <div class="podium-avatar-wrap">
+              <div class="podium-rank-badge" aria-label="Troisième place">3</div>
+              <div class="podium-avatar" id="podium-avatar-3">?</div>
+            </div>
+            <div class="podium-name" id="podium-name-3">En attente</div>
+            <div class="podium-score" id="podium-score-3">—</div>
+          </div>
+        </div>
+
+        <!-- Reste du classement -->
+        <div class="leaderboard-list" id="leaderboard-rows">
+          <!-- Rempli en JS -->
+        </div>
+
+        <button id="btn-replay" class="btn btn-primary" style="margin-top: 2.5rem; width: 100%;">
+          Retour à l'accueil
+        </button>
+      </section>
+
+    </main>
+
+
+
+    <!-- Toast pour copier le lien -->
+    <div id="copy-toast" class="copy-toast">Lien de partage copié dans le presse-papiers !</div>
+
+  </div>
+
+  <!-- Fichiers JS -->
+  <script src="questions.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>
