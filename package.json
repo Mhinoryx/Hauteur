@@ -1,0 +1,11 @@
+{
+  "name": "quiz-hauteur",
+  "private": true,
+  "scripts": {
+    "dev:cloudflare": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

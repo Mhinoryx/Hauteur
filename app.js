@@ -2,6 +2,74 @@
 // Logique principale du Jeu de Quiz Astral (Bleu Nuit) - Version WebSockets sans Tchat avec Prêt & Bonus Rapidité
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Adaptateur WebSocket natif pour le déploiement Cloudflare Workers.
+  // Il conserve la petite API on/emit utilisée par le reste de l'application.
+  function createWorkerSocket() {
+    const listeners = new Map();
+    const pendingMessages = [];
+    let webSocket = null;
+    let connectionStarted = false;
+    let connectionErrorSent = false;
+
+    const dispatch = (event, data) => {
+      (listeners.get(event) || []).forEach(handler => handler(data));
+    };
+
+    const connect = (room) => {
+      connectionStarted = true;
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const url = `${protocol}//${window.location.host}/ws?room=${encodeURIComponent(room)}`;
+      webSocket = new WebSocket(url);
+
+      webSocket.addEventListener('open', () => {
+        pendingMessages.splice(0).forEach(message => webSocket.send(message));
+      });
+
+      webSocket.addEventListener('message', (event) => {
+        try {
+          const message = JSON.parse(event.data);
+          dispatch(message.event, message.data);
+        } catch (error) {
+          console.error('Message WebSocket invalide', error);
+        }
+      });
+
+      webSocket.addEventListener('error', () => {
+        if (!connectionErrorSent) {
+          connectionErrorSent = true;
+          dispatch('connect_error');
+        }
+      });
+
+      webSocket.addEventListener('close', () => dispatch('disconnect'));
+    };
+
+    return {
+      on(event, handler) {
+        if (!listeners.has(event)) listeners.set(event, []);
+        listeners.get(event).push(handler);
+      },
+      emit(event, data = {}) {
+        if (!connectionStarted) {
+          const room = event === 'create_room'
+            ? Array.from({ length: 4 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)]).join('')
+            : String(data.room || '').toUpperCase();
+          connect(room);
+        }
+
+        const message = JSON.stringify({ event, data });
+        if (webSocket && webSocket.readyState === WebSocket.OPEN) {
+          webSocket.send(message);
+        } else {
+          pendingMessages.push(message);
+        }
+      },
+      disconnect() {
+        if (webSocket && webSocket.readyState < WebSocket.CLOSING) webSocket.close(1000);
+      }
+    };
+  }
+
   // --- ÉTATS DE L'APPLICATION ---
   let pseudo = '';
   let roomCode = '';
@@ -173,15 +241,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function setupSocket() {
-    if (typeof window.io !== 'function') {
-      return false;
-    }
-
     if (socket) {
       socket.disconnect();
     }
 
-    socket = io();
+    const isCloudflareHost = window.location.hostname.endsWith('.workers.dev')
+      || window.location.hostname.endsWith('.pages.dev');
+    const useSocketIo = typeof window.io === 'function' && !isCloudflareHost;
+    socket = useSocketIo ? window.io() : createWorkerSocket();
 
     // Le serveur renvoie le code du salon créé
     socket.on('room_created', (data) => {
