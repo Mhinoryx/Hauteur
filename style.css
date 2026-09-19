@@ -1076,3 +1076,353 @@ h1.game-title {
     font-size: 0.85rem;
   }
 }
+
+/* Responsive mobile
+   L'ecran de jeu tient dans la hauteur utile ; les ecrans de contenu restent
+   naturellement scrollables. */
+@media (max-width: 700px) {
+  html,
+  body {
+    width: 100%;
+    min-width: 0;
+    min-height: 100%;
+    overflow-x: hidden;
+  }
+
+  body {
+    min-height: 100svh;
+    min-height: 100dvh;
+  }
+
+  #app-layout {
+    width: 100%;
+    height: 100svh;
+    height: 100dvh;
+    min-height: 0;
+  }
+
+  #main-content {
+    justify-content: flex-start;
+    min-width: 0;
+    min-height: 0;
+    padding: max(0.75rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right)) max(0.75rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .glass-panel {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: none;
+    padding: clamp(1rem, 5vw, 1.5rem);
+    border-radius: 14px;
+  }
+
+  h1.game-title {
+    font-size: clamp(1.9rem, 9vw, 2.35rem);
+    margin-bottom: 1.25rem;
+  }
+
+  .btn,
+  .input-field {
+    min-height: 48px;
+  }
+
+  .btn {
+    width: 100%;
+    padding: 0.75rem 1rem;
+  }
+
+  .input-group {
+    margin-bottom: 1rem;
+  }
+
+  #screen-welcome > p {
+    margin-bottom: 1.2rem;
+  }
+
+  .lobby-info {
+    gap: 1rem;
+    margin: 1rem 0 0;
+  }
+
+  .share-card {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.85rem;
+  }
+
+  .share-card > div {
+    max-width: 100% !important;
+  }
+
+  .share-card .btn {
+    font-size: 0.9rem !important;
+  }
+
+  .players-list {
+    max-height: min(27svh, 180px);
+    padding: 0.55rem;
+  }
+
+  .player-item {
+    gap: 0.5rem;
+    padding: 0.65rem 0.35rem;
+  }
+
+  .player-name-wrapper {
+    min-width: 0;
+    flex-wrap: wrap;
+  }
+
+  .player-name-wrapper strong {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .dashboard-stat-grid {
+    gap: 0.5rem;
+    margin-bottom: 0;
+  }
+
+  .gm-dashboard {
+    gap: 1rem;
+  }
+
+  .stat-card {
+    min-width: 0;
+    padding: 0.7rem 0.35rem;
+  }
+
+  .stat-val {
+    font-size: clamp(1.1rem, 5vw, 1.4rem);
+  }
+
+  .stat-label {
+    font-size: 0.65rem;
+  }
+
+  .current-question-preview {
+    padding: 1rem;
+  }
+
+  #screen-gm-dashboard .gm-dashboard > div:last-child {
+    flex-direction: column;
+    gap: 0.65rem !important;
+  }
+
+  /* Ecran joueur : grille 2 x 2 et aucune marge desktop superflue. */
+  #screen-player {
+    display: grid;
+    grid-template-rows: auto minmax(0, auto) minmax(0, 1fr) auto;
+    gap: clamp(0.65rem, 2.1svh, 1rem);
+    height: 100%;
+    min-height: 0;
+    padding: clamp(0.8rem, 4vw, 1.15rem);
+    overflow: hidden;
+  }
+
+  #screen-player.hidden {
+    display: none;
+  }
+
+  .quiz-header {
+    margin: 0;
+  }
+
+  .question-counter {
+    font-size: 0.9rem;
+  }
+
+  #screen-player .difficulty-badge {
+    margin-top: 0.25rem !important;
+    padding: 0.22rem 0.6rem;
+    font-size: 0.7rem;
+  }
+
+  .timer-container,
+  .timer-svg {
+    width: clamp(48px, 14vw, 56px);
+    height: clamp(48px, 14vw, 56px);
+  }
+
+  .timer-text {
+    font-size: 1rem;
+  }
+
+  .question-text {
+    align-self: center;
+    margin: 0;
+    font-size: clamp(1rem, 4.5vw, 1.25rem);
+    line-height: 1.24;
+    text-wrap: balance;
+  }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    gap: clamp(0.45rem, 2vw, 0.7rem);
+    min-height: 0;
+    margin: 0;
+  }
+
+  .option-btn {
+    min-width: 0;
+    min-height: 58px;
+    padding: clamp(0.55rem, 2.5vw, 0.8rem);
+    font-size: clamp(0.78rem, 3.5vw, 0.95rem);
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+
+  .option-btn::before {
+    flex: 0 0 auto;
+    width: 25px;
+    height: 25px;
+    margin-right: clamp(0.4rem, 2vw, 0.7rem);
+    border-radius: 7px;
+    font-size: 0.78rem;
+  }
+
+  .feedback-box {
+    max-height: 22svh;
+    margin: 0;
+    padding: 0.7rem;
+    overflow-y: auto;
+    font-size: 0.85rem;
+    line-height: 1.25;
+  }
+
+  #screen-leaderboard h1.game-title {
+    margin-bottom: 0.75rem;
+  }
+
+  .podium-container {
+    gap: 0.45rem;
+    margin: 3.4rem 0 1rem;
+  }
+
+  .podium-step,
+  .podium-1st,
+  .podium-2nd,
+  .podium-3rd {
+    padding: 2.65rem 0.35rem 0.7rem;
+  }
+
+  .podium-avatar {
+    width: 46px;
+    height: 46px;
+  }
+
+  .podium-rank-badge {
+    width: 32px;
+    height: 32px;
+    font-size: 0.85rem;
+  }
+
+  .leaderboard-row {
+    gap: 0.5rem;
+    padding: 0.7rem 0.75rem;
+  }
+
+  .leaderboard-row-left {
+    min-width: 0;
+    gap: 0.55rem;
+  }
+
+  .leaderboard-score {
+    flex: 0 0 auto;
+  }
+
+  #btn-replay {
+    margin-top: 1.25rem !important;
+  }
+
+  .copy-toast {
+    right: max(0.75rem, env(safe-area-inset-right));
+    bottom: max(0.75rem, env(safe-area-inset-bottom));
+    left: max(0.75rem, env(safe-area-inset-left));
+    width: auto;
+    padding: 0.75rem 1rem;
+    text-align: center;
+    transform: translateY(calc(100% + 2rem));
+  }
+
+  .copy-toast.show {
+    transform: translateY(0);
+  }
+}
+
+/* Telephones courts / mode paysage : on gagne encore de la hauteur sans
+   reduire les zones tactiles sous une taille confortable. */
+@media (max-width: 700px) and (max-height: 680px) {
+  #main-content {
+    padding-top: max(0.45rem, env(safe-area-inset-top));
+    padding-bottom: max(0.45rem, env(safe-area-inset-bottom));
+  }
+
+  #screen-player {
+    gap: 0.45rem;
+    padding: 0.65rem;
+  }
+
+  .timer-container,
+  .timer-svg {
+    width: 44px;
+    height: 44px;
+  }
+
+  .question-text {
+    font-size: clamp(0.92rem, 4vw, 1.05rem);
+    line-height: 1.18;
+  }
+
+  .option-btn {
+    min-height: 50px;
+    padding: 0.45rem;
+    font-size: clamp(0.72rem, 3.2vw, 0.86rem);
+  }
+
+  .feedback-box {
+    padding: 0.5rem 0.65rem;
+    font-size: 0.78rem;
+  }
+}
+
+@media (max-width: 700px) and (orientation: landscape) {
+  #screen-player {
+    grid-template-columns: minmax(130px, 0.65fr) minmax(0, 1.35fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+
+  #screen-player .quiz-header {
+    grid-column: 1;
+  }
+
+  #screen-player .question-text {
+    grid-column: 1;
+  }
+
+  #screen-player .options-grid {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  #screen-player .feedback-box {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
