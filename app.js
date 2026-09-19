@@ -103,8 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnJoinGame = document.getElementById('btn-join-game');
 
   // Lobby
-  const shareLink = document.getElementById('share-link');
-  const btnCopyLink = document.getElementById('btn-copy-link');
+  const roomQrCode = document.getElementById('room-qr-code');
+  const lobbyRoomCode = document.getElementById('lobby-room-code');
   const lobbyPlayersList = document.getElementById('lobby-players');
   const lobbyGmControls = document.getElementById('lobby-gm-controls');
   const lobbyPlayerMessage = document.getElementById('lobby-player-message');
@@ -143,9 +143,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const leaderboardRows = document.getElementById('leaderboard-rows');
   const btnReplay = document.getElementById('btn-replay');
 
-  // Utilities
-  const copyToast = document.getElementById('copy-toast');
-
   // --- INITIALISATION ---
   function init() {
     // Vérifier si un code de session est présent dans l'URL
@@ -161,13 +158,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Événements d'accueil
     btnCreateGame.addEventListener('click', () => startSession(true));
     btnJoinGame.addEventListener('click', () => startSession(false));
-
-    // Événement copie lien
-    btnCopyLink.addEventListener('click', copyShareLink);
-    shareLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      copyShareLink();
-    });
 
     // Événement démarrage de partie (MJ)
     btnStartGame.addEventListener('click', startGame);
@@ -366,11 +356,22 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function setupLobbyUI() {
-    // Activer l'URL de partage
+    // Le QR contient l'URL de connexion, sans exposer le lien dans l'interface.
     history.pushState(null, '', `?room=${roomCode}`);
-    const shareUrl = `${window.location.origin}${window.location.pathname}?room=${roomCode}`;
-    shareLink.href = shareUrl;
-    shareLink.textContent = shareUrl;
+    const joinUrl = `${window.location.origin}${window.location.pathname}?room=${encodeURIComponent(roomCode)}`;
+    lobbyRoomCode.textContent = roomCode;
+
+    if (window.QRCode && roomQrCode) {
+      window.QRCode.toCanvas(roomQrCode, joinUrl, {
+        width: 176,
+        margin: 2,
+        errorCorrectionLevel: 'M',
+        color: {
+          dark: '#332a24',
+          light: '#fffdf8'
+        }
+      }).catch(error => console.error('Impossible de générer le QR code', error));
+    }
 
     // Afficher l'écran lobby
     showScreen(screenLobby);
@@ -692,16 +693,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (type === 'success') playerFeedback.classList.add('feedback-success');
     if (type === 'error') playerFeedback.classList.add('feedback-error');
     if (type === 'pending') playerFeedback.classList.add('feedback-pending');
-  }
-
-  function copyShareLink() {
-    const url = shareLink.href;
-    navigator.clipboard.writeText(url).then(() => {
-      copyToast.classList.add('show');
-      setTimeout(() => {
-        copyToast.classList.remove('show');
-      }, 2000);
-    });
   }
 
   function getDifficultyLabel(diff) {

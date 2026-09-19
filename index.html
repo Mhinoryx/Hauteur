@@ -51,13 +51,14 @@
 
         <div class="lobby-info">
           <div class="share-card">
-            <div style="text-align: left; max-width: calc(100% - 130px);">
-              <span class="input-label" style="margin-bottom: 0.2rem;">Lien de partage</span>
-              <a id="share-link" class="share-link-text" href="#" target="_blank">Lien de partage de la partie</a>
+            <div class="room-qr-wrap">
+              <canvas id="room-qr-code" class="room-qr-code" role="img" aria-label="QR code pour rejoindre la partie"></canvas>
             </div>
-            <button id="btn-copy-link" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
-              📋 Copier
-            </button>
+            <div class="room-code-wrap">
+              <span class="input-label">Code de la partie</span>
+              <strong id="lobby-room-code" class="room-code">----</strong>
+              <p class="room-join-hint">Scannez le QR code ou saisissez ce code pour rejoindre la partie.</p>
+            </div>
           </div>
 
           <div>
@@ -213,12 +214,10 @@
 
 
 
-    <!-- Toast pour copier le lien -->
-    <div id="copy-toast" class="copy-toast">Lien de partage copié dans le presse-papiers !</div>
-
   </div>
 
   <!-- Fichiers JS -->
+  <script src="qrcode.min.js"></script>
   <script src="questions.js"></script>
   <script src="app.js"></script>
 </body>

@@ -274,19 +274,42 @@ p {
   gap: 1rem;
 }
 
-.share-link-text {
-  font-size: 0.85rem;
-  color: var(--color-accent);
-  text-decoration: underline;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  cursor: pointer;
+.room-qr-wrap {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  padding: 0.55rem;
+  background: #fffdf8;
+  border: 1px solid var(--border-glass);
+  border-radius: 12px;
+}
+
+.room-qr-code {
+  display: block;
+  width: 148px !important;
+  height: 148px !important;
+  image-rendering: pixelated;
+}
+
+.room-code-wrap {
+  flex: 1;
+  min-width: 0;
   text-align: left;
 }
 
-.share-link-text:hover {
-  color: var(--text-main);
+.room-code {
+  display: block;
+  color: var(--color-primary);
+  font-size: clamp(2rem, 8vw, 3rem);
+  line-height: 1;
+  letter-spacing: 0.16em;
+  overflow-wrap: anywhere;
+}
+
+.room-join-hint {
+  margin: 0.8rem 0 0;
+  font-size: 0.85rem;
+  line-height: 1.35;
 }
 
 /* Joueurs Connectés */
@@ -777,26 +800,6 @@ p {
   display: none !important;
 }
 
-/* Notification de copie du lien */
-.copy-toast {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%) translateY(100px);
-  background: var(--color-success);
-  color: #fff;
-  padding: 0.8rem 1.5rem;
-  border-radius: 30px;
-  font-weight: 700;
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
-  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  z-index: 1000;
-}
-
-.copy-toast.show {
-  transform: translateX(-50%) translateY(0);
-}
-
 /* Theme automnal mat */
 :root {
   --bg-deep: #211c18;
@@ -940,10 +943,6 @@ h1.game-title {
 .podium-3rd .podium-bar {
   background: #97583b;
   box-shadow: inset 0 -4px 0 rgba(73, 37, 24, 0.18);
-}
-
-.copy-toast {
-  box-shadow: 0 6px 16px rgba(44, 31, 23, 0.18);
 }
 
 /* Podium aligne */
@@ -1157,8 +1156,21 @@ h1.game-title {
     max-width: 100% !important;
   }
 
-  .share-card .btn {
-    font-size: 0.9rem !important;
+  .room-code-wrap {
+    text-align: center;
+  }
+
+  .room-qr-code {
+    width: min(44vw, 164px) !important;
+    height: min(44vw, 164px) !important;
+  }
+
+  .room-code {
+    font-size: clamp(2rem, 12vw, 2.8rem);
+  }
+
+  .room-join-hint {
+    margin-top: 0.65rem;
   }
 
   .players-list {
@@ -1341,19 +1353,6 @@ h1.game-title {
     margin-top: 1.25rem !important;
   }
 
-  .copy-toast {
-    right: max(0.75rem, env(safe-area-inset-right));
-    bottom: max(0.75rem, env(safe-area-inset-bottom));
-    left: max(0.75rem, env(safe-area-inset-left));
-    width: auto;
-    padding: 0.75rem 1rem;
-    text-align: center;
-    transform: translateY(calc(100% + 2rem));
-  }
-
-  .copy-toast.show {
-    transform: translateY(0);
-  }
 }
 
 /* Telephones courts / mode paysage : on gagne encore de la hauteur sans
